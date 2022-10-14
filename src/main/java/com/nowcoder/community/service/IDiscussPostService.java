@@ -10,4 +10,10 @@ public interface IDiscussPostService {
 
     public int findDiscussPostRows(int userId);
 
+    public int addDiscussPost(DiscussPost post);
+
+    public DiscussPost findDiscussPostById(int id);
+
+    public int updateCommentCount(int id,int commentCount);
+
 }
