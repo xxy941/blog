@@ -21,4 +21,12 @@ public interface IUserService {
     public int updateHeader(int userId,String headerUrl);
 
     public int updatePassword(int userId,String newpassword);
+
+    public User findUserByName(String username);
+
+    public User getCache(int userId);
+
+    public User initCache(int userId);
+
+    public void clearCache(int userId);
 }
