@@ -2,7 +2,9 @@ package com.nowcoder.community.service;
 
 import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.entity.User;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Collection;
 import java.util.Map;
 
 public interface IUserService {
@@ -29,4 +31,6 @@ public interface IUserService {
     public User initCache(int userId);
 
     public void clearCache(int userId);
+
+    public Collection<? extends GrantedAuthority> getAuthorities(int userId);
 }
