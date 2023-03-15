@@ -5,9 +5,11 @@ import com.nowcoder.community.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 public interface IUserService {
+
     public User findUserById(int id);
 
     public Map<String,Object> register(User user);
@@ -33,4 +35,5 @@ public interface IUserService {
     public void clearCache(int userId);
 
     public Collection<? extends GrantedAuthority> getAuthorities(int userId);
+
 }

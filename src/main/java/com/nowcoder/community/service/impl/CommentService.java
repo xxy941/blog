@@ -3,7 +3,7 @@ package com.nowcoder.community.service.impl;
 import com.nowcoder.community.dao.CommentMapper;
 import com.nowcoder.community.entity.Comment;
 import com.nowcoder.community.service.ICommentService;
-import com.nowcoder.community.service.IDiscussPostService;
+import com.nowcoder.community.service.IBlogService;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class CommentService implements ICommentService, CommunityConstant {
     private SensitiveFilter sensitiveFilter;
 
     @Autowired
-    private IDiscussPostService discussPostService;
+    private IBlogService discussPostService;
 
     @Override
     public List<Comment> findCommentsByEntity(int entityType, int entityId, int offset, int limit) {
@@ -49,7 +49,7 @@ public class CommentService implements ICommentService, CommunityConstant {
         comment.setContent(sensitiveFilter.filter(comment.getContent()));
         int rows = commentMapper.insertComment(comment);
         /** 更新帖子评论数据 */
-        if(comment.getEntityType() == ENTITY_TYPE_POST){
+        if(comment.getEntityType() == ENTITY_TYPE_BLOG){
             int count = commentMapper.selectCountByEntity(comment.getEntityType(),comment.getEntityId());
             discussPostService.updateCommentCount(comment.getEntityId(),count);
         }

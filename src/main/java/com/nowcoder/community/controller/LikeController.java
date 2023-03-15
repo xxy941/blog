@@ -60,14 +60,12 @@ public class LikeController implements CommunityConstant {
                     .setData("postId",postId);
             eventProducer.fireEvent(event);
 
-            if(entityType == ENTITY_TYPE_POST){
+            if(entityType == ENTITY_TYPE_BLOG){
                 /** 计算发帖分数 */
                 String redisKey = RedisKeyUtil.getPostScoreKey();
                 redisTemplate.opsForSet().add(redisKey,postId);
             }
         }
-
-
 
         return CommunityUtil.getJSONString(0,null,map);
     }

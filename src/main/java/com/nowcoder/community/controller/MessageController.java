@@ -38,7 +38,7 @@ public class MessageController implements CommunityConstant {
     @Autowired
     private HostHolder hostHolder;
 
-    @RequestMapping(path = "/letter/list",method = RequestMethod.GET)
+    @RequestMapping("/letter/list")
     public String getLetterList(Model model, Page page){
         User user = hostHolder.getUser();
         /** 分页信息 */
@@ -64,12 +64,11 @@ public class MessageController implements CommunityConstant {
         model.addAttribute("conversations",conversations);
         /** 未读消息数量 */
         model.addAttribute("letterUnreadCount",messageService.findLetterUnreadCount(user.getId(),null));
-        model.addAttribute("noticeUnreadCount",messageService.findNoticeUnreadCount(user.getId(), null));
 
         return "/site/letter";
     }
 
-    @RequestMapping(path = "/letter/detail/{conversationId}",method = RequestMethod.GET)
+    @RequestMapping("/letter/detail/{conversationId}")
     public String getLetterDetail(@PathVariable("conversationId") String conversationId,Page page,Model model){
         /** 分页信息 */
         page.setLimit(5);
@@ -79,12 +78,19 @@ public class MessageController implements CommunityConstant {
         List<Message> letterList = messageService.findLetters(conversationId,page.getOffset(), page.getLimit());
         List<Map<String,Object>> letters = new ArrayList<>();
         if(letterList != null){
-            for (Message letter : letterList) {
+            for(int i = letterList.size() - 1;i >= 0;i--){
                 Map<String,Object> map = new HashMap<>();
+                Message letter = letterList.get(i);
                 map.put("letter",letter);
                 map.put("fromUser",userService.findUserById(letter.getFromId()));
                 letters.add(map);
             }
+//            for (Message letter : letterList) {
+//                Map<String,Object> map = new HashMap<>();
+//                map.put("letter",letter);
+//                map.put("fromUser",userService.findUserById(letter.getFromId()));
+//                letters.add(map);
+//            }
         }
         model.addAttribute("letters",letters);
         model.addAttribute("target",getLetterTarget(conversationId));
@@ -144,7 +150,7 @@ public class MessageController implements CommunityConstant {
         else return id2 + "_" + id1;
     }
 
-    @RequestMapping(path = "/notice/list",method = RequestMethod.GET)
+    @RequestMapping("/notice/list")
     public String getNoticeList(Model model){
         User user = hostHolder.getUser();
         /** 查询评论类的通知 */
@@ -223,7 +229,7 @@ public class MessageController implements CommunityConstant {
         return "/site/notice";
     }
 
-    @RequestMapping(path = "/notice/{conversationId}/list",method = RequestMethod.GET)
+    @RequestMapping("/notice/{conversationId}/list")
     public String getConversationIdNoticeList(Model model,@PathVariable("conversationId")String topic,Page page){
         User user = hostHolder.getUser();
 
@@ -258,7 +264,7 @@ public class MessageController implements CommunityConstant {
     }
 
     /**  */
-    @RequestMapping(path = "/notice/detail/{topic}",method = RequestMethod.GET)
+    @RequestMapping("/notice/detail/{topic}")
     public String getNoticeDetail(@PathVariable("topic")String topic,Model model,Page page){
         User user = hostHolder.getUser();
 

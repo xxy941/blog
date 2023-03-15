@@ -1,10 +1,8 @@
 package com.nowcoder.community.mapper;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.util.ObjectBuilder;
-import com.nowcoder.community.dao.DiscussPostMapper;
+import com.nowcoder.community.dao.BlogMapper;
 import com.nowcoder.community.dao.elasticsearch.DiscussPostRepository;
-import com.nowcoder.community.entity.DiscussPost;
+import com.nowcoder.community.entity.Blog;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -30,7 +28,7 @@ import java.util.List;
 public class ElasticsearchTests {
 
     @Autowired
-    private DiscussPostMapper discussPostMapper;
+    private BlogMapper blogMapper;
 
     @Autowired
     private DiscussPostRepository discussPostRepository;
@@ -40,29 +38,29 @@ public class ElasticsearchTests {
 
     @Test
     public void testInsert(){
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(241));
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(242));
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(243));
+        discussPostRepository.save(blogMapper.selectBlogById(241));
+        discussPostRepository.save(blogMapper.selectBlogById(242));
+        discussPostRepository.save(blogMapper.selectBlogById(243));
     }
 
     @Test
     public void testInsertList(){
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(101,0,100,0));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(102,0,100,0));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(103,0,100,0));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(111,0,100,0));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(112,0,100,0));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(131,0,100,0));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(132,0,100,0));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(133,0,100,0));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(134,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(101,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(102,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(103,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(111,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(112,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(131,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(132,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(133,0,100,0));
+        discussPostRepository.saveAll(blogMapper.selectBlogs(134,0,100,0));
     }
 
     @Test
     public void testUpdate(){
-        DiscussPost discussPost = discussPostMapper.selectDiscussPostById(231);
-        discussPost.setContent("我是新人，使劲灌水");
-        discussPostRepository.save(discussPost);
+        Blog blog = blogMapper.selectBlogById(231);
+        blog.setContent("我是新人，使劲灌水");
+        discussPostRepository.save(blog);
     }
 
     @Test
@@ -85,42 +83,42 @@ public class ElasticsearchTests {
                 ).build();
 
 
-        SearchHits<DiscussPost> search = elasticSearchRestTemplate.search(build, DiscussPost.class);
-        SearchPage<DiscussPost> page = SearchHitSupport.searchPageFor(search, build.getPageable());
+        SearchHits<Blog> search = elasticSearchRestTemplate.search(build, Blog.class);
+        SearchPage<Blog> page = SearchHitSupport.searchPageFor(search, build.getPageable());
         System.out.println(page.getTotalElements());
         System.out.println(page.getTotalPages());
         System.out.println(page.getNumber());
         System.out.println(page.getSize());
-        for (SearchHit<DiscussPost> discussPostSearchHit : page) {
+        for (SearchHit<Blog> discussPostSearchHit : page) {
             System.out.println("高亮内容"+discussPostSearchHit.getHighlightFields()); //高亮内容
             System.out.println("原始内容"+discussPostSearchHit.getContent()); //原始内容
         }
         //下面是封装将高亮部分成一个page对象，也可以不做，直接discussPostSearchHit.getHighlightFields()获取
-        List<DiscussPost> list = new ArrayList<>();
-        for (SearchHit<DiscussPost> discussPostSearchHit : page) {
-            DiscussPost discussPost = discussPostSearchHit.getContent();
+        List<Blog> list = new ArrayList<>();
+        for (SearchHit<Blog> discussPostSearchHit : page) {
+            Blog blog = discussPostSearchHit.getContent();
             //discussPostSearchHit.getHighlightFields() //高亮
             if (discussPostSearchHit.getHighlightFields().get("title") != null) {
-                discussPost.setTitle(discussPostSearchHit.getHighlightFields().get("title").get(0));
+                blog.setTitle(discussPostSearchHit.getHighlightFields().get("title").get(0));
             }
             if (discussPostSearchHit.getHighlightFields().get("content") != null) {
-                discussPost.setContent(discussPostSearchHit.getHighlightFields().get("content").get(0));
+                blog.setContent(discussPostSearchHit.getHighlightFields().get("content").get(0));
             }
             //System.out.println(discussPostSearchHit.getContent());
-            list.add(discussPost);
+            list.add(blog);
         }
 
-        for (DiscussPost discussPost : list) {
-            System.out.println("123 " + discussPost + " 321");
+        for (Blog blog : list) {
+            System.out.println("123 " + blog + " 321");
         }
 
-        PageImpl<DiscussPost> pageInfo = new PageImpl<DiscussPost>(list, build.getPageable(), search.getTotalHits());
+        PageImpl<Blog> pageInfo = new PageImpl<Blog>(list, build.getPageable(), search.getTotalHits());
         System.out.println(pageInfo.getTotalElements());
         System.out.println(pageInfo.getTotalPages());
         System.out.println(pageInfo.getNumber());
         System.out.println(pageInfo.getSize());
-        for (DiscussPost discussPost : pageInfo) {
-            System.out.println(discussPost);
+        for (Blog blog : pageInfo) {
+            System.out.println(blog);
         }
 
 

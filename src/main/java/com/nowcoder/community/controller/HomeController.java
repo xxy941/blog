@@ -1,9 +1,9 @@
 package com.nowcoder.community.controller;
 
-import com.nowcoder.community.entity.DiscussPost;
+import com.nowcoder.community.entity.Blog;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
-import com.nowcoder.community.service.IDiscussPostService;
+import com.nowcoder.community.service.IBlogService;
 import com.nowcoder.community.service.ILikeService;
 import com.nowcoder.community.service.IUserService;
 import com.nowcoder.community.util.CommunityConstant;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class HomeController implements CommunityConstant {
 
     @Autowired
-    private IDiscussPostService discussPostService;
+    private IBlogService blogService;
 
     @Autowired
     private IUserService userService;
@@ -29,33 +29,69 @@ public class HomeController implements CommunityConstant {
     @Autowired
     private ILikeService likeService;
 
-    @RequestMapping(path = "/index",method = RequestMethod.GET)
+    @RequestMapping(path = "/" )
+    public String root(){
+        return "forward:/index";
+    }
+
+    @RequestMapping("/index")
     public String getIndexPage(Model model, Page page,
                                @RequestParam(name = "orderMode",defaultValue = "0") int orderMode){
         /** 方法调用前，SpringMVC会自动实例化Model和Page,并且将Page注入到Model */
         /** 所以在thymeleaf中可以直接访问Page对象中的数据 */
-        page.setRows(discussPostService.findDiscussPostRows(0));
+        page.setRows(blogService.findBlogRows(0));
         page.setPath("/index?orderMode=" + orderMode);
 
-        List<DiscussPost> list = discussPostService.findDiscussPosts(0,page.getOffset(),page.getLimit(),orderMode);
-        List<Map<String,Object>> discussPosts = new ArrayList<>();
+        List<Blog> list = blogService.findBlogs(0,page.getOffset(),page.getLimit(),orderMode);
+        List<Map<String,Object>> blogs = new ArrayList<>();
         if(list != null){
-            for (DiscussPost discussPost : list) {
+            for (Blog blog : list) {
                 Map<String,Object> map = new HashMap<>();
-                map.put("post",discussPost);
-                User user = userService.findUserById(discussPost.getUserId());
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_BLOG, blog.getId());
+                User user = userService.findUserById(blog.getUserId());
+                map.put("blog", blog);
                 map.put("user",user);
-
-                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, discussPost.getId());
                 map.put("likeCount",likeCount);
-
-                discussPosts.add(map);
+                blogs.add(map);
             }
         }
-        model.addAttribute("discussPosts",discussPosts);
+        model.addAttribute("blogs",blogs);
         model.addAttribute("orderMode",orderMode);
-
         return "/index";
+    }
+
+    @RequestMapping("/searchpage")
+    public String getSearchPage(){
+        return "/site/searchpage";
+    }
+
+    @RequestMapping("/manager")
+    public String getManagerPage(Model model, Page page){
+        /** 方法调用前，SpringMVC会自动实例化Model和Page,并且将Page注入到Model */
+        /** 所以在thymeleaf中可以直接访问Page对象中的数据 */
+        page.setRows(blogService.findBlogRows(0));
+        page.setPath("/manager");
+
+        List<Blog> list = blogService.findBlogs(0,page.getOffset(),page.getLimit(),0);
+        List<Map<String,Object>> blogs = new ArrayList<>();
+        if(list != null){
+            for (Blog blog : list) {
+                Map<String,Object> map = new HashMap<>();
+                User user = userService.findUserById(blog.getUserId());
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_BLOG, blog.getId());
+                map.put("blog", blog);
+                map.put("user",user);
+                map.put("likeCount",likeCount);
+                blogs.add(map);
+            }
+        }
+        model.addAttribute("blogs",blogs);
+        return "/site/manager";
+    }
+
+    @RequestMapping("/classify")
+    public String getClassifyPage(){
+        return "/site/classify";
     }
 
     @RequestMapping(path = "/error",method = RequestMethod.GET)
@@ -63,7 +99,7 @@ public class HomeController implements CommunityConstant {
         return "/error/500";
     }
 
-    @RequestMapping(path = "/denied",method = RequestMethod.GET)
+    @RequestMapping("/denied")
     public String getDeniedPage(){
         return "/error/404";
     }

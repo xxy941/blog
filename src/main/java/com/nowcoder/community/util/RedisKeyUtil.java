@@ -19,6 +19,9 @@ public class RedisKeyUtil {
     private static final String PREFIX_DAU = "dau";
     private static final String PREFIX_POST = "post";
 
+    /** 用户点赞的帖子 */
+    private static final String PREFIX_LIKE_POST = "like:post";
+
 
 
 
@@ -58,6 +61,11 @@ public class RedisKeyUtil {
     /** 用户 */
     public static String getUserKey(int userId){
         return PREFIX_USER + SPLIT + userId;
+    }
+
+    /** 用户点赞的帖子 */
+    public static String getLikePostKey(int userId){
+        return PREFIX_LIKE_POST + SPLIT + userId;
     }
 
     /** 单日UV */

@@ -2,6 +2,16 @@ $(function(){
 	$(".follow-btn").click(follow);
 });
 
+function send(loginUserId,userId) {
+	if(loginUserId > userId){
+		var temp = loginUserId;
+		loginUserId = userId;
+		userId = temp;
+	}
+	location.href = CONTEXT_PATH + "/letter/detail/" + loginUserId + "_" + userId;
+}
+
+
 function follow() {
 	var btn = this;
 	if($(btn).hasClass("btn-info")) {
@@ -35,4 +45,21 @@ function follow() {
 		);
 		//$(btn).text("关注TA").removeClass("btn-secondary").addClass("btn-info");
 	}
+}
+
+//删除
+function setDelete(id) {
+	$.post(
+		CONTEXT_PATH + "/blog/delete",
+		{"id":id},
+		function (data) {
+			data = $.parseJSON(data);
+			var userid = $("#deleteBtn").val()
+			if(data.code == 0){
+				location.href = CONTEXT_PATH + "/user/profile/" + userid;
+			}else {
+				alert(data.msg);
+			}
+		}
+	)
 }

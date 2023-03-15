@@ -1,14 +1,13 @@
 package com.nowcoder.community.service;
 
-import com.nowcoder.community.entity.DiscussPost;
-import org.springframework.data.domain.Page;
+import com.nowcoder.community.entity.Blog;
 import org.springframework.data.elasticsearch.core.SearchPage;
 
 public interface IElasticsearchService
 {
-    public void saveDiscussPost(DiscussPost discussPost);
+    public void saveBlog(Blog blog);
 
-    public void deleteDiscussPost(int id);
+    public void deleteBlog(int id);
 
-    public SearchPage<DiscussPost> searchDiscussPost(String keyword, int current, int limit);
+    public SearchPage<Blog> searchBlog(String keyword, int current, int limit);
 }

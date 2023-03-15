@@ -74,6 +74,14 @@ public class UserService implements IUserService, CommunityConstant {
             map.put("emailMsg","邮箱不能为空!");
             return map;
         }
+        if(user.getUsername().length()>15){
+            map.put("usernameMsg","账号长度不能大于10!");
+            return map;
+        }
+        if(user.getPassword().length()<6||user.getPassword().length()>15){
+            map.put("passwordMsg","密码长度应大于6小于16!");
+            return map;
+        }
         /** 验证账号 */
         User u = userMapper.selectByName(user.getUsername());
         if(u != null){
@@ -81,17 +89,17 @@ public class UserService implements IUserService, CommunityConstant {
             return map;
         }
         /** 验证邮箱 */
-        u = userMapper.selectByEmail(user.getEmail());
-        if(u != null){
-            map.put("emailMsg","邮箱已存在!");
-            return map;
-        }
+//        u = userMapper.selectByEmail(user.getEmail());
+//        if(u != null){
+//            map.put("emailMsg","邮箱已存在!");
+//            return map;
+//        }
         /** 注册用户 */
         user.setSalt(CommunityUtil.generateUUID().substring(0,5));
         user.setPassword(CommunityUtil.md5(user.getPassword() + user.getSalt()));
         user.setType(0);
         user.setStatus(0);
-        user.setActivationCode(CommunityUtil.generateUUID());
+        user.setActivationCode(CommunityUtil.generateUUID().substring(0,4));
         user.setHeaderUrl(String.format("https://images.nowcoder.com/head/%dt.png",new Random().nextInt(1000)));
         user.setCreateTime(new Date());
         userMapper.insertUser(user);
@@ -99,12 +107,9 @@ public class UserService implements IUserService, CommunityConstant {
         /** 激活邮件 */
         Context context = new Context();
         context.setVariable("email",user.getEmail());
-        /** http://localhost:8080/community/activation/101/code */
-        String url = domain + contextPath + "/activation/" + user.getId() + "/"  + user.getActivationCode();
-        context.setVariable("url",url);
+        context.setVariable("activation",user.getActivationCode());
         String content = templateEngine.process("/mail/activation",context);
-        mailClient.sendMail(user.getEmail(), "激活账号" ,content);
-
+        mailClient.sendMail(user.getEmail(), "账户激活码" ,content);
         return map;
     }
 

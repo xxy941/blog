@@ -1,11 +1,11 @@
 package com.nowcoder.community.controller;
 
+import com.nowcoder.community.entity.Blog;
 import com.nowcoder.community.entity.Comment;
-import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.Event;
 import com.nowcoder.community.event.EventProducer;
 import com.nowcoder.community.service.ICommentService;
-import com.nowcoder.community.service.IDiscussPostService;
+import com.nowcoder.community.service.IBlogService;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.HostHolder;
 import com.nowcoder.community.util.RedisKeyUtil;
@@ -32,7 +32,7 @@ public class CommentController implements CommunityConstant {
     private EventProducer eventProducer;
 
     @Autowired
-    private IDiscussPostService discussPostService;
+    private IBlogService blogService;
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -52,8 +52,8 @@ public class CommentController implements CommunityConstant {
                 .setEntityId(comment.getEntityId())
                 .setData("postId",discussPostId);
 
-        if(comment.getEntityType() == ENTITY_TYPE_POST){
-            DiscussPost target = discussPostService.findDiscussPostById(comment.getEntityId());
+        if(comment.getEntityType() == ENTITY_TYPE_BLOG){
+            Blog target = blogService.findBlogById(comment.getEntityId());
             event.setEntityUserId(target.getUserId());
         } else if(comment.getEntityType() == ENTITY_TYPE_COMMENT){
             Comment target = commentService.findCommentById(comment.getEntityId());
@@ -61,12 +61,12 @@ public class CommentController implements CommunityConstant {
         }
         eventProducer.fireEvent(event);
 
-        if(comment.getEntityType() == ENTITY_TYPE_POST){
+        if(comment.getEntityType() == ENTITY_TYPE_BLOG){
             /** 触发发帖事件 */
             event = new Event()
                     .setTopic(TOPIC_PUBLISH)
                     .setUserId(comment.getUserId())
-                    .setEntityType(ENTITY_TYPE_POST)
+                    .setEntityType(ENTITY_TYPE_BLOG)
                     .setEntityId(discussPostId);
             eventProducer.fireEvent(event);
             /** 计算发帖分数 */

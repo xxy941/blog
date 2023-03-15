@@ -1,7 +1,7 @@
 package com.nowcoder.community.service.impl;
 
 import com.nowcoder.community.dao.elasticsearch.DiscussPostRepository;
-import com.nowcoder.community.entity.DiscussPost;
+import com.nowcoder.community.entity.Blog;
 import com.nowcoder.community.service.IElasticsearchService;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
@@ -27,17 +27,17 @@ public class ElasticsearchService implements IElasticsearchService {
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Override
-    public void saveDiscussPost(DiscussPost discussPost) {
-        discussPostRepository.save(discussPost);
+    public void saveBlog(Blog blog) {
+        discussPostRepository.save(blog);
     }
 
     @Override
-    public void deleteDiscussPost(int id) {
+    public void deleteBlog(int id) {
         discussPostRepository.deleteById(id);
     }
 
     @Override
-    public SearchPage<DiscussPost> searchDiscussPost(String keyword, int current, int limit) {
+    public SearchPage<Blog> searchBlog(String keyword, int current, int limit) {
         NativeSearchQuery searchQueryBuilder = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.multiMatchQuery(keyword, "title", "content"))
                 .withSorts(SortBuilders.fieldSort("type").order(SortOrder.DESC),
@@ -50,21 +50,21 @@ public class ElasticsearchService implements IElasticsearchService {
                 ).build();
 
         //得到查询结果
-        SearchHits<DiscussPost> search = elasticsearchRestTemplate.search(searchQueryBuilder, DiscussPost.class);
+        SearchHits<Blog> search = elasticsearchRestTemplate.search(searchQueryBuilder, Blog.class);
         //将其结果返回并进行分页
-        SearchPage<DiscussPost> page = SearchHitSupport.searchPageFor(search, Page.empty().getPageable());
+        SearchPage<Blog> page = SearchHitSupport.searchPageFor(search, Page.empty().getPageable());
 
         if (!page.isEmpty()) {
-            for (SearchHit<DiscussPost> discussPostSearch : page) {
-                DiscussPost discussPost = discussPostSearch.getContent();
+            for (SearchHit<Blog> discussPostSearch : page) {
+                Blog blog = discussPostSearch.getContent();
                 //取高亮
                 List<String> title = discussPostSearch.getHighlightFields().get("title");
                 if(title!=null){
-                    discussPost.setTitle(title.get(0));
+                    blog.setTitle(title.get(0));
                 }
                 List<String> content = discussPostSearch.getHighlightFields().get("content");
                 if(content!=null){
-                    discussPost.setContent(content.get(0));
+                    blog.setContent(content.get(0));
                 }
             }
         }

@@ -1,6 +1,6 @@
 package com.nowcoder.community.controller;
 
-import com.nowcoder.community.entity.DiscussPost;
+import com.nowcoder.community.entity.Blog;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.service.IElasticsearchService;
 import com.nowcoder.community.service.ILikeService;
@@ -32,28 +32,28 @@ public class SearchController implements CommunityConstant {
     private ILikeService likeService;
 
     /** search?keyword=xxx */
-    @RequestMapping(path = "/search",method = RequestMethod.GET)
+    @RequestMapping("/search")
     public String search(String keyword, Page page, Model model){
         /** 搜索帖子 */
-        SearchPage<DiscussPost> searchPage = elasticsearchService.searchDiscussPost(keyword, page.getCurrent() - 1, page.getLimit());
+        SearchPage<Blog> searchPage = elasticsearchService.searchBlog(keyword, page.getCurrent() - 1, page.getLimit());
 
-        List<Map<String, Object>> discussPosts = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> blogs = new ArrayList<Map<String, Object>>();
         if (searchPage != null) {
-            for (SearchHit<DiscussPost> discussPostSearchHit : searchPage) {
+            for (SearchHit<Blog> blogSearchHit : searchPage) {
                 Map<String, Object> map = new HashMap<>();
                 //帖子
-                DiscussPost post = discussPostSearchHit.getContent();
-                map.put("post", post);
+                Blog blog = blogSearchHit.getContent();
+                map.put("blog", blog);
                 // 作者
-                map.put("user", userService.findUserById(post.getUserId()));
+                map.put("user", userService.findUserById(blog.getUserId()));
                 //点赞
-                map.put("likeCount", likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId()));
+                map.put("likeCount", likeService.findEntityLikeCount(ENTITY_TYPE_BLOG, blog.getId()));
 
-                discussPosts.add(map);
+                blogs.add(map);
             }
         }
 
-        model.addAttribute("discussPosts", discussPosts);
+        model.addAttribute("blogs", blogs);
         model.addAttribute("keyword", keyword);
 
         // 分页信息

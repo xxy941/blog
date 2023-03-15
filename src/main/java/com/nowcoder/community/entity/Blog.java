@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.util.Date;
 
 @Document(indexName = "discusspost",shards = 6,replicas = 3)
-public class DiscussPost {
+public class Blog {
 
     @Id
     private int id;
@@ -40,6 +40,9 @@ public class DiscussPost {
     @Field(type = FieldType.Double)
     private double score;
 
+    @Field(type = FieldType.Text)
+    private String tag;
+
     @Override
     public String toString() {
         return "DiscussPost{" +
@@ -52,6 +55,7 @@ public class DiscussPost {
                 ", createTime=" + createTime +
                 ", commentCount=" + commentCount +
                 ", score=" + score +
+                ", tag='" + tag + '\'' +
                 '}';
     }
 
@@ -125,5 +129,13 @@ public class DiscussPost {
 
     public void setScore(double score) {
         this.score = score;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

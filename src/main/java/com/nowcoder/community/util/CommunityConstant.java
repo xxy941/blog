@@ -29,7 +29,7 @@ public interface CommunityConstant {
     /**
      * 实体类型:帖子
      */
-    int ENTITY_TYPE_POST = 1;
+    int ENTITY_TYPE_BLOG = 1;
 
     /**
      * 实体类型:评论
@@ -65,6 +65,11 @@ public interface CommunityConstant {
      * 主题:删帖
      */
     String TOPIC_DELETE = "delete";
+
+    /**
+     * 主题:分享
+     */
+    String TOPIC_SHARE = "share";
 
     /**
      * 系统用户ID

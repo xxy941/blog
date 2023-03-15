@@ -1,13 +1,18 @@
 package com.nowcoder.community.controller;
 
 import com.nowcoder.community.annotation.LoginRequired;
+import com.nowcoder.community.entity.Blog;
+import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.service.IBlogService;
 import com.nowcoder.community.service.IFollowService;
 import com.nowcoder.community.service.ILikeService;
 import com.nowcoder.community.service.IUserService;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
+import com.qiniu.util.Auth;
+import com.qiniu.util.StringMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
@@ -19,6 +24,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +32,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
@@ -53,12 +63,83 @@ public class UserController implements CommunityConstant {
     @Autowired
     private IFollowService followService;
 
+    @Autowired
+    private IBlogService blogService;
+
+    @Value("${qiniu.key.access}")
+    private String accessKey;
+
+    @Value("${qiniu.key.secret}")
+    private String secretKey;
+
+    @Value("${qiniu.bucket.header.name}")
+    private String headerBucketName;
+
+    @Value("${qiniu.bucket.header.url}")
+    private String headerBucketUrl;
+
     @LoginRequired
-    @RequestMapping(path = "/setting",method = RequestMethod.GET)
-    public String getSettingPage(){
-        return "/site/setting";
+    @RequestMapping("/mypost")
+    public String getMyDiscussPostPage(Model model, Page page){
+        User user = hostHolder.getUser();
+        page.setPath("/user/mypost");
+        page.setRows(blogService.findBlogRows(user.getId()));
+        page.setLimit(5);
+        List<Blog> list = blogService.findBlogs(user.getId(), page.getOffset(), page.getLimit(),0);
+        List<Map<String,Object>> myDiscussPosts = new ArrayList<>();
+        if(list != null){
+            for (Blog post : list) {
+                Map<String,Object> map = new HashMap<>();
+                map.put("post",post);
+                map.put("user",user);
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_BLOG,post.getId());
+                map.put("likeCount",likeCount);
+                myDiscussPosts.add(map);
+            }
+        }
+        model.addAttribute("discussPosts",myDiscussPosts);
+        return "/site/my-post";
     }
 
+    @LoginRequired
+    @RequestMapping("/avatar")
+    public String getAvatarPage(Model model){
+        /** 上传文件名称 */
+        String fileName = CommunityUtil.generateUUID();
+        /** 设置响应信息 */
+        StringMap policy = new StringMap();
+        policy.put("returnBody", CommunityUtil.getJSONString(0));
+        /** 生成上传凭证 */
+        Auth auth = Auth.create(accessKey,secretKey);
+        String uploadToken = auth.uploadToken(headerBucketName,fileName,3600,policy);
+
+        model.addAttribute("uploadToken",uploadToken);
+        model.addAttribute("fileName",fileName);
+
+        return "/site/avatar";
+    }
+
+    @LoginRequired
+    @RequestMapping("/password")
+    public String getPasswordPage(Model model){
+        return "/site/password";
+    }
+
+    /** 更新头像路径 */
+    @RequestMapping(path = "/header/url",method = RequestMethod.POST)
+    @ResponseBody
+    public String updateHeaderUrl(String fileName){
+        if(StringUtils.isBlank(fileName)){
+            return CommunityUtil.getJSONString(1,"文件名不能为空!");
+        }
+
+        String url = headerBucketUrl + "/" + fileName;
+        userService.updateHeader(hostHolder.getUser().getId(),url);
+
+        return CommunityUtil.getJSONString(0);
+    }
+
+    /** 废弃 */
     @LoginRequired
     @RequestMapping(path = "/upload",method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model){
@@ -96,7 +177,8 @@ public class UserController implements CommunityConstant {
     }
 
 
-    @RequestMapping(path = "/header/{fileName}",method = RequestMethod.GET)
+    /** 废弃 */
+    @RequestMapping("/header/{fileName}")
     public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response){
         /** 服务器存放路径 */
         fileName = uploadPath + "/" + fileName;
@@ -108,8 +190,6 @@ public class UserController implements CommunityConstant {
                 FileInputStream fis = new FileInputStream(fileName);
                 OutputStream os = response.getOutputStream();
                 ){
-
-
             byte[] buffer = new byte[1024];
             int b = 0;
             while((b = fis.read(buffer)) != -1){
@@ -122,15 +202,21 @@ public class UserController implements CommunityConstant {
 
     @LoginRequired
     @RequestMapping(path = "/change_password",method = RequestMethod.POST)
-    public String changePassword(@Param("password") String password, @Param("newPassword") String newPassword, Model model){
+    public String changePassword(@Param("password") String password, @Param("newPassword") String newPassword, @Param("newPassword2") String newPassword2,Model model){
         if(StringUtils.isBlank(password)){
             model.addAttribute("passwordError","原密码不能为空!");
-            return "/site/setting";
+            return "/site/password";
         }
         if(StringUtils.isBlank(newPassword)){
             model.addAttribute("newPasswordError","新密码不能为空!");
-            return "/site/setting";
+            return "/site/password";
         }
+
+        if(!newPassword.equals(newPassword2)){
+            model.addAttribute("newPasswordError","新密码不一致!");
+            return "/site/password";
+        }
+
         User user = hostHolder.getUser();
         password = CommunityUtil.md5(password + user.getSalt());
         if(password.equals(user.getPassword())){
@@ -139,13 +225,13 @@ public class UserController implements CommunityConstant {
             return "redirect:/index";
         }else {
             model.addAttribute("passwordError","原密码错误!");
-            return "/site/setting";
+            return "/site/password";
         }
     }
 
-    /** 个人主页 */
-    @RequestMapping(path = "/profile/{userId}",method = RequestMethod.GET)
-    public String getProfilePage(@PathVariable("userId") int userId,Model model){
+    /** 个人主页加个人帖子 */
+    @RequestMapping("/profile/{userId}")
+    public String getProfilePage(@PathVariable("userId") int userId,Model model,Page page){
         User user = userService.findUserById(userId);
         if(user == null){
             throw new RuntimeException("该用户不存在!");
@@ -167,6 +253,68 @@ public class UserController implements CommunityConstant {
             hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
         }
         model.addAttribute("hasFollowed",hasFollowed);
+        /** 我的帖子 */
+        page.setPath("/user/profile/" + userId);
+        page.setRows(blogService.findBlogRows(userId));
+        page.setLimit(5);
+        List<Blog> list = blogService.findBlogs(user.getId(), page.getOffset(), page.getLimit(),0);
+        List<Map<String,Object>> myBlogs = new ArrayList<>();
+        if(list != null){
+            for (Blog blog : list) {
+                Map<String,Object> map = new HashMap<>();
+                map.put("blog",blog);
+                map.put("user",user);
+                long userLikeCount = likeService.findEntityLikeCount(ENTITY_TYPE_BLOG,blog.getId());
+                map.put("userLikeCount",userLikeCount);
+                myBlogs.add(map);
+            }
+        }
+        model.addAttribute("blogs",myBlogs);
+
+        return "/site/profile";
+    }
+
+    /** 个人主页加点赞帖子 */
+    @RequestMapping("/likepost/{userId}")
+    public String getLikePage(@PathVariable("userId") int userId,Model model,Page page){
+        User user = userService.findUserById(userId);
+        if(user == null){
+            throw new RuntimeException("该用户不存在!");
+        }
+        int likeCount = likeService.findUserLikeCount(userId);
+        /** 用户信息 */
+        model.addAttribute("user",user);
+        /** 点赞数量 */
+        model.addAttribute("likeCount",likeCount);
+        /** 关注数量 */
+        long followeeCount = followService.findFolloweeCount(userId,ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount",followeeCount);
+        /** 粉丝数量 */
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER,userId);
+        model.addAttribute("followerCount",followerCount);
+        /** 是否已关注 */
+        boolean hasFollowed = false;
+        if(hostHolder.getUser() != null){
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
+        }
+        model.addAttribute("hasFollowed",hasFollowed);
+        /** 点赞的帖子 */
+        page.setPath("/user/likepost/" + userId);
+        page.setRows((int) likeService.findLikePostCount(userId));
+        page.setLimit(5);
+        List<Blog> list = likeService.findLikePosts(userId, page.getOffset(), page.getLimit());
+        List<Map<String,Object>> myBlogs = new ArrayList<>();
+        if(list != null){
+            for (Blog blog : list) {
+                Map<String,Object> map = new HashMap<>();
+                map.put("blog",blog);
+                map.put("user",userService.findUserById(blog.getUserId()));
+                long userLikeCount = likeService.findEntityLikeCount(ENTITY_TYPE_BLOG,blog.getId());
+                map.put("userLikeCount",userLikeCount);
+                myBlogs.add(map);
+            }
+        }
+        model.addAttribute("blogs",myBlogs);
 
         return "/site/profile";
     }

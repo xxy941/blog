@@ -4,7 +4,7 @@ package com.nowcoder.community.controller;
 import com.nowcoder.community.entity.*;
 import com.nowcoder.community.event.EventProducer;
 import com.nowcoder.community.service.ICommentService;
-import com.nowcoder.community.service.IDiscussPostService;
+import com.nowcoder.community.service.IBlogService;
 import com.nowcoder.community.service.ILikeService;
 import com.nowcoder.community.service.IUserService;
 import com.nowcoder.community.util.CommunityConstant;
@@ -21,11 +21,11 @@ import java.util.*;
 
 
 @Controller
-@RequestMapping("/discuss")
-public class DiscussPostController implements CommunityConstant {
+@RequestMapping("/blog")
+public class BlogController implements CommunityConstant {
 
     @Autowired
-    private IDiscussPostService discussPostService;
+    private IBlogService blogService;
 
     @Autowired
     private HostHolder hostHolder;
@@ -47,24 +47,25 @@ public class DiscussPostController implements CommunityConstant {
 
     @RequestMapping(path = "/add",method = RequestMethod.POST)
     @ResponseBody
-    public String addDiscussPost(String title,String content){
+    public String addBlog(String title, String content, String tag){
         User user = hostHolder.getUser();
         if(user == null){
             return CommunityUtil.getJSONString(403,"你还没有登录哦!");
         }
 
-        DiscussPost post = new DiscussPost();
+        Blog post = new Blog();
         post.setUserId(user.getId());
         post.setTitle(title);
         post.setContent(content);
         post.setCreateTime(new Date());
-        discussPostService.addDiscussPost(post);
+        post.setTag(tag);
+        blogService.addBlog(post);
 
         /** 触发发帖事件 */
         Event event = new Event()
                 .setTopic(TOPIC_PUBLISH)
                 .setUserId(user.getId())
-                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityType(ENTITY_TYPE_BLOG)
                 .setEntityId(post.getId());
 
         eventProducer.fireEvent(event);
@@ -77,33 +78,42 @@ public class DiscussPostController implements CommunityConstant {
         return CommunityUtil.getJSONString(0,"发布成功!");
     }
 
-    @RequestMapping(path = "/detail/{discussPostId}",method = RequestMethod.GET)
+    @RequestMapping("/classify/{tag}")
+    public String getClassifyBlogs(Model model, Page page, @PathVariable("tag") String tag){
+        page.setPath("/blog/classify/" + tag);
+        page.setRows(blogService.findTagBlogRows(tag));
+        List<Blog> blogs = blogService.findBlogsByTag(tag,page.getOffset(), page.getLimit());
+        List<Map<String,Object>> tagBlogs = new ArrayList<>();
+        if(blogs != null){
+            for (Blog blog : blogs) {
+                Map<String,Object> map = new HashMap<>();
+                map.put("blog", blog);
+                map.put("user",userService.findUserById(blog.getUserId()));
+                map.put("likeCount",likeService.findEntityLikeCount(ENTITY_TYPE_BLOG, blog.getId()));
+                tagBlogs.add(map);
+            }
+        }
+        model.addAttribute("tag",tag);
+        model.addAttribute("blogs",tagBlogs);
+        return "/site/classify-page";
+    }
+
+    @RequestMapping("/detail/{discussPostId}")
     public String getDiscussPost(@PathVariable("discussPostId") int discussPostId, Model model, Page page){
-        /** 帖子 */
-        DiscussPost post = discussPostService.findDiscussPostById(discussPostId);
+        Blog post = blogService.findBlogById(discussPostId);
+        int likeStatus = hostHolder.getUser() == null ? 0 : likeService.findEntityLikeStatus(hostHolder.getUser().getId(), ENTITY_TYPE_BLOG,discussPostId);
+        long likeCount = 0;
         model.addAttribute("post",post);
-        /** 作者 */
-        User user = userService.findUserById(post.getUserId());
-        model.addAttribute("user",user);
-        /** 点赞数量 */
-        long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST,discussPostId);
-        model.addAttribute("likeCount",likeCount);
-        /** 点赞状态 */
-        int likeStatus = hostHolder.getUser() == null ? 0 : likeService.findEntityLikeStatus(hostHolder.getUser().getId(),ENTITY_TYPE_POST,discussPostId);
+        model.addAttribute("user",userService.findUserById(post.getUserId()));
+        model.addAttribute("likeCount",likeService.findEntityLikeCount(ENTITY_TYPE_BLOG,discussPostId));
         model.addAttribute("likeStatus",likeStatus);
 
-        /** 评论的分页信息 */
         page.setLimit(5);
-        page.setPath("/discuss/detail/" + discussPostId);
+        page.setPath("/blog/detail/" + discussPostId);
         page.setRows(post.getCommentCount());
 
-        /**
-         * 评论:给帖子的评论
-         * 回复:给评论的评论
-         * 评论列表
-         */
         List<Comment> commentList = commentService.findCommentsByEntity(
-                ENTITY_TYPE_POST,post.getId(),page.getOffset(),page.getLimit());
+                ENTITY_TYPE_BLOG,post.getId(),page.getOffset(),page.getLimit());
         List<Map<String,Object>> commentVoList = new ArrayList<>();
         if(commentVoList != null){
             for (Comment comment : commentList) {
@@ -162,13 +172,13 @@ public class DiscussPostController implements CommunityConstant {
     @RequestMapping(path = "/top",method = RequestMethod.POST)
     @ResponseBody
     public String setTop(int id){
-        discussPostService.updateType(id,1);
+        blogService.updateType(id,1);
 
         /** 触发发帖事件 */
         Event event = new Event()
                 .setTopic(TOPIC_PUBLISH)
                 .setUserId(hostHolder.getUser().getId())
-                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityType(ENTITY_TYPE_BLOG)
                 .setEntityId(id);
 
         eventProducer.fireEvent(event);
@@ -180,13 +190,13 @@ public class DiscussPostController implements CommunityConstant {
     @RequestMapping(path = "/wonderful",method = RequestMethod.POST)
     @ResponseBody
     public String setWonderful(int id){
-        discussPostService.updateStatus(id,1);
+        blogService.updateStatus(id,1);
 
         /** 触发发帖事件 */
         Event event = new Event()
                 .setTopic(TOPIC_PUBLISH)
                 .setUserId(hostHolder.getUser().getId())
-                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityType(ENTITY_TYPE_BLOG)
                 .setEntityId(id);
 
         eventProducer.fireEvent(event);
@@ -202,15 +212,13 @@ public class DiscussPostController implements CommunityConstant {
     @RequestMapping(path = "/delete",method = RequestMethod.POST)
     @ResponseBody
     public String setDelete(int id){
-        discussPostService.updateStatus(id,2);
-        System.out.println(id);
-        System.out.println(id);
-        System.out.println(id);
+        blogService.updateStatus(id,2);
+        likeService.deleteLikePosts(id);
         /** 触发发帖事件 */
         Event event = new Event()
                 .setTopic(TOPIC_DELETE)
                 .setUserId(hostHolder.getUser().getId())
-                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityType(ENTITY_TYPE_BLOG)
                 .setEntityId(id);
 
         eventProducer.fireEvent(event);

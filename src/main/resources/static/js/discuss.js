@@ -25,7 +25,7 @@ function like(btn,entityType,entityId,entityUserId,postId){
 //置顶
 function setTop() {
     $.post(
-        CONTEXT_PATH + "/discuss/top",
+        CONTEXT_PATH + "/blog/top",
         {"id":$("#postId").val()},
         function (data) {
             data = $.parseJSON(data);
@@ -41,7 +41,7 @@ function setTop() {
 //加精
 function setWonderful() {
     $.post(
-        CONTEXT_PATH + "/discuss/wonderful",
+        CONTEXT_PATH + "/blog/wonderful",
         {"id":$("#postId").val()},
         function (data) {
             data = $.parseJSON(data);
@@ -57,7 +57,7 @@ function setWonderful() {
 //删除
 function setDelete() {
     $.post(
-        CONTEXT_PATH + "/discuss/delete",
+        CONTEXT_PATH + "/blog/delete",
         {"id":$("#postId").val()},
         function (data) {
             data = $.parseJSON(data);

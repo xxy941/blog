@@ -1,10 +1,9 @@
 package com.nowcoder.community.quartz;
 
-import com.nowcoder.community.entity.DiscussPost;
-import com.nowcoder.community.service.IDiscussPostService;
+import com.nowcoder.community.entity.Blog;
+import com.nowcoder.community.service.IBlogService;
 import com.nowcoder.community.service.IElasticsearchService;
 import com.nowcoder.community.service.ILikeService;
-import com.nowcoder.community.service.impl.DiscussPostService;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.RedisKeyUtil;
 import org.quartz.Job;
@@ -20,15 +19,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class PostScoreRefreshJob implements Job, CommunityConstant {
+public class RefreshBlogScoreJob implements Job, CommunityConstant {
 
-    private static final Logger logger = LoggerFactory.getLogger(PostScoreRefreshJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(RefreshBlogScoreJob.class);
 
     @Autowired
     private RedisTemplate redisTemplate;
 
     @Autowired
-    private IDiscussPostService discussPostService;
+    private IBlogService blogService;
 
     @Autowired
     private ILikeService likeService;
@@ -66,31 +65,31 @@ public class PostScoreRefreshJob implements Job, CommunityConstant {
         logger.info("[任务结束] 帖子分数刷新完毕!");
     }
 
-    private void refresh(int postId){
-        DiscussPost post = discussPostService.findDiscussPostById(postId);
+    private void refresh(int blogId){
+        Blog blog =  blogService.findBlogById(blogId);
 
-        if(post == null){
-            logger.error("该帖子不存在: id = " + postId);
+        if(blog == null){
+            logger.error("该帖子不存在: id = " + blogId);
             return;
         }
 
         /** 是否精华 */
-        boolean wonderful = post.getStatus() == 1;
+        boolean wonderful = blog.getStatus() == 1;
         /** 评论数量 */
-        int commentCount = post.getCommentCount();
+        int commentCount = blog.getCommentCount();
         /** 点赞数量 */
-        long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST,postId);
+        long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_BLOG,blogId);
 
         /** 计算权重 */
         double w = (wonderful ? 75 : 0) + commentCount * 10 + likeCount * 2;
         /** 分数 = 帖子权重 + 距离天数 */
         double score = Math.log10(Math.max(w,1)) +
-                (post.getCreateTime().getTime() - epoch.getTime())/(1000 * 3600 * 24);
+                (blog.getCreateTime().getTime() - epoch.getTime())/(1000 * 3600 * 24);
         /** 更新帖子分数 */
-        discussPostService.updateScore(postId,score);
+        blogService.updateScore(blogId,score);
         /** 同步搜索数据 */
-        post.setScore(score);
-        elasticsearchService.saveDiscussPost(post);
+        blog.setScore(score);
+        elasticsearchService.saveBlog(blog);
 
     }
 }
