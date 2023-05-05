@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nowcoder.community.dao.UserMapper">
+<mapper namespace="com.xxy.blog.dao.UserMapper">
 
     <sql id="insertFields">
         username, password, salt, email, type, status, activation_code, header_url, create_time
@@ -10,6 +10,10 @@
 
     <sql id="selectFields">
         id, username, password, salt, email, type, status, activation_code, header_url, create_time
+    </sql>
+
+    <sql id="selectUserInfoFields">
+        id, username, email, header_url, age, sex, education, introduction
     </sql>
 
     <select id="selectById" resultType="User">
@@ -24,10 +28,10 @@
         where username = #{username}
     </select>
 
-    <select id="selectByEmail" resultType="User">
-        select <include refid="selectFields"></include>
+    <select id="selectUserInfoById" resultType="User">
+        select <include refid="selectUserInfoFields"></include>
         from user
-        where email = #{email}
+        where id = #{id}
     </select>
 
     <insert id="insertUser" parameterType="User" keyProperty="id">
@@ -45,6 +49,10 @@
 
     <update id="updatePassword">
         update user set password = #{password} where id = #{id}
+    </update>
+
+    <update id="updateUserInfo">
+        update user set age = #{age},sex = #{sex},education = #{education},introduction = #{introduction} where id = #{id}
     </update>
 
 </mapper>

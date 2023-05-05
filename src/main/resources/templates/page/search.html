@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!--	&lt;!&ndash;访问该页面时，在此处生成CSRF令牌,&ndash;&gt;-->
+	<!--	<meta name="_csrf" th:content="${_csrf.token}">-->
+	<!--	<meta name="_csrf_header" th:content="${_csrf.headerName}">-->
+<!--	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">-->
+	<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+	<link rel="stylesheet" th:href="@{/css/global.css}" />
+	<link rel="stylesheet" th:href="@{/css/index2.css}" />
+	<link rel="stylesheet" th:href="@{/css/index.css}" />
+	<title>搜索结果</title>
+</head>
+<body>
+<div class="nk-container">
+	<!-- 头部 -->
+	<div class="header" style="height: 5%" th:fragment="header">
+		<div class="header_resize" style="height: 5%">
+			<div class="menu_nav" style="height: 5%">
+				<ul>
+					<li><a th:href="@{/index}">首页</a></li>
+					<li><a th:href="@{/classify}">专区</a></li>
+					<li th:if="${loginUser!=null}"><a th:href="@{/conversation/list}">私信</a></li>
+					<li class="active"><a th:href="@{/searchpage}">搜索</a></li>
+					<li th:if="${loginUser==null}"><a th:href="@{/register}">注册</a></li>
+					<li th:if="${loginUser==null}"><a th:href="@{/login}">登录</a></li>
+					<li th:if="${loginUser!=null}" sec:authorize="hasAnyAuthority('admin')"> <a th:href="@{/manager}" >管理</a></li>
+				</ul>
+			</div>
+			<div class="searchform" th:if="${loginUser!=null}">
+				<div class="headPortrait" title ="个人中心"> <a th:if="${loginUser!=null}" th:href="@{|/user/profile/${loginUser.id}|}"  > <img th:src="${loginUser.headerUrl}" /></a></div>
+			</div>
+			<br><br th:if="${loginUser==null}">
+		</div>
+	</div>
+
+	<!-- 内容 -->
+	<div class="main" style="background-image: url(/img/bg1.png);background-size: 100% 100%;background-attachment: fixed">
+		<div class="container" style="width: 80%;background-color: #dfd3f6;border-radius: 20px;" >
+			<!-- 帖子列表 -->
+			<ul class="list-unstyled">
+				<li class="media pb-2 pt-2 mb-1 " style="width: 520px;height: 200px;margin-left: 20px;margin-top: 20px;float:left;background-color: #ebdef6;border-radius: 10px" th:each="map:${blogs}">
+					<a th:href="@{|/user/profile/${map.user.id}|}">
+						<img th:src="${map.user.headerUrl}" class="mr-4" alt="用户头像" style="width:95px;height:95px;">
+					</a>
+					<div class="media-body">
+						<h6 class="mt-1 mb-1" style="font-size: 20px">
+							<a th:href="@{|/blog/detail/${map.blog.id}|}" th:utext="${map.blog.title}" style="font-size: 18px;color: #985fb6;">备战春招，面试刷题跟他复习，一个月全搞定！</a>
+							<span class="badge badge-secondary" style="background-color: #985fb6;float: right;margin-right: 20px" th:utext="${map.blog.tag}">标签</span>
+						</h6>
+						<div class="mb-1" th:utext="${map.blog.content}" style="margin-top: 1px;font-size: 15px">
+							博客内容
+						</div>
+						<div class="text-muted font-size-12" style="font-size: 15px">
+							<u class="mr-1" th:utext="${map.user.username}" style="color: #088bbd">用户名</u><b th:text="${#dates.format(map.blog.createTime,'yyyy-MM-dd HH时')}">2019-04-15 15:32:18</b>
+							<a type="button" style="text-align: center;" th:href="@{|/blog/detail/${map.blog.id}|}" class="btn2" />阅读更多</a>
+							<ul class="d-inline float-right mr-4 mt-2">
+								<li class="d-inline ml-2"><img src="/img/like.jpg" style="width: 15px;height: 15px;margin-right: 4px"><span th:text="${map.likeCount}">点赞数</span></li>
+								<li class="d-inline ml-2">|</li>
+								<li class="d-inline ml-2"><img src="/img/comment.jpg" style="width: 15px;height: 15px;margin-right: 4px"><span th:text="${map.blog.commentCount}">评论数</span></li>
+							</ul>
+						</div>
+						<hr style="height:1px;border-top:1px double #985fb6;" />
+					</div>
+				</li>
+			</ul>
+			<!-- 分页 -->
+			<nav class="mt-5" th:if="${page.rows>0}" th:replace="index::pagination">
+			</nav>
+		</div>
+	</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
+<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>-->
+<script th:src="@{/js/global.js}"></script>
+<script th:src="@{/js/bootstrap.js}" crossorigin="anonymous"></script>
+</body>
+</html>

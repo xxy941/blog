@@ -2,59 +2,39 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nowcoder.community.dao.BlogMapper">
+<mapper namespace="com.xxy.blog.dao.BlogMapper">
     <sql id="selectFields">
         id,user_id,title,content,type,status,create_time,comment_count,score,tag
+    </sql>
+
+    <sql id="idAndCommentCount">
+        id,comment_count
     </sql>
 
     <sql id="insertFields">
         user_id,title,content,type,status,create_time,comment_count,score,tag
     </sql>
 
-<!--    <select id="selectDiscussPosts" resultType="DiscussPost">-->
-<!--        select <include refid="selectFields"></include>-->
-<!--        from discuss_post-->
-<!--        where status != 2-->
-<!--        <if test="userId!=0">-->
-<!--            and user_id = #{userId}-->
-<!--        </if>-->
-<!--        <if test="orderMode==0">-->
-<!--            order by type desc,create_time desc-->
-<!--        </if>-->
-<!--        <if test="orderMode==1">-->
-<!--            order by type desc,score desc,create_time desc-->
-<!--        </if>-->
-<!--        limit #{offset} ,#{limit}-->
-<!--    </select>-->
-
-
 
     <select id="selectBlogs" resultType="Blog">
-        SELECT <include refid="selectFields"></include>
-        FROM discuss_post
-        WHERE id IN(
-            SELECT t.id FROM
-                (
-                    SELECT id FROM
-                        discuss_post
-                    WHERE STATUS != 2
-                    <if test="userId!=0">
-                        and user_id = #{userId}
-                    </if>
-                    <if test="orderMode==0">
-                        order by type desc,create_time desc
-                    </if>
-                    <if test="orderMode==1">
-                        order by type desc,score desc,create_time desc
-                    </if>
-                        limit #{offset},#{limit}
-                ) AS t
-        ) ORDER BY TYPE DESC,create_time DESC
+        select <include refid="selectFields"></include>
+        from blog
+        where status != 2
+        <if test="userId!=0">
+        and user_id = #{userId}
+        </if>
+        <if test="orderMode==0">
+            order by create_time desc
+        </if>
+        <if test="orderMode==1">
+            order by score desc,create_time desc
+        </if>
+        limit #{offset},#{limit}
     </select>
 
     <select id="selectBlogRows" resultType="int">
         select count(id)
-        from discuss_post
+        from blog
         where status != 2
         <if test="userId!=0">
             and user_id = #{userId}
@@ -63,7 +43,7 @@
 
     <select id="selectDiscussPostByUserId" resultType="Blog">
         select <include refid="selectFields"></include>
-        from discuss_post
+        from blog
         where status != 2
         and user_id = #{userId}
         limit #{offset},#{limit}
@@ -71,42 +51,62 @@
 
     <select id="selectBlogsByTag" resultType="Blog">
         SELECT <include refid="selectFields"></include>
-        FROM discuss_post
+        FROM blog
         WHERE status != 2 and tag = #{tag}
+        ORDER BY TYPE DESC,create_time DESC
+        limit #{offset},#{limit}
+    </select>
+
+    <select id="selectBlogsByKeyword" resultType="Blog">
+        SELECT <include refid="selectFields"></include>
+        FROM blog
+        WHERE status != 2 and ( title like #{keyword} or content like #{keyword} )
         ORDER BY TYPE DESC,create_time DESC
         limit #{offset},#{limit}
     </select>
 
     <select id="selectTagBlogRows" resultType="int">
         SELECT count(id)
-        FROM discuss_post
+        FROM blog
         WHERE status != 2 and tag = #{tag}
     </select>
 
+    <select id="selectAllBlogs" resultType="Blog">
+        select <include refid="idAndCommentCount"></include>
+        from blog
+        where status != 2
+    </select>
+
+
+
     <insert id="insertBlog" parameterType="Blog" keyProperty="id">
-        insert into discuss_post(<include refid="insertFields"></include>)
+        insert into blog(<include refid="insertFields"></include>)
         values (#{userId},#{title},#{content},#{type},#{status},#{createTime},#{commentCount},#{score},#{tag})
     </insert>
 
     <select id="selectBlogById" resultType="Blog">
         select <include refid="selectFields"></include>
-        from discuss_post
+        from blog
         where id = #{id}
     </select>
     
     <update id="updateCommentCount">
-        update discuss_post set comment_count = #{commentCount} where id = #{id}
+        update blog set comment_count = #{commentCount} where id = #{id}
     </update>
 
     <update id="updateType">
-        update discuss_post set type = #{type} where id = #{id}
+        update blog set type = #{type} where id = #{id}
     </update>
 
     <update id="updateStatus">
-        update discuss_post set status = #{status} where id = #{id}
+        update blog set status = #{status} where id = #{id}
     </update>
 
     <update id="updateScore">
-        update discuss_post set score = #{score} where id = #{id}
+        update blog set score = #{score} where id = #{id}
+    </update>
+
+    <update id="updateBlog">
+        update blog set title = #{title},tag = #{tag},content = #{content} where id = #{id}
     </update>
 </mapper>

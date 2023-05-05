@@ -8,13 +8,13 @@ function send(loginUserId,userId) {
 		loginUserId = userId;
 		userId = temp;
 	}
-	location.href = CONTEXT_PATH + "/letter/detail/" + loginUserId + "_" + userId;
+	location.href = CONTEXT_PATH + "/conversation/detail/" + loginUserId + "_" + userId;
 }
 
 
 function follow() {
 	var btn = this;
-	if($(btn).hasClass("btn-info")) {
+	if($(btn).hasClass("btn")) {
 		// 关注TA
 		$.post(
 			CONTEXT_PATH + "/follow",
@@ -28,7 +28,6 @@ function follow() {
 				}
 			}
 		);
-		//$(btn).text("已关注").removeClass("btn-info").addClass("btn-secondary");
 	} else {
 		// 取消关注
 		$.post(
@@ -43,23 +42,35 @@ function follow() {
 				}
 			}
 		);
-		//$(btn).text("关注TA").removeClass("btn-secondary").addClass("btn-info");
 	}
 }
 
 //删除
-function setDelete(id) {
+function setDelete(id,userId) {
 	$.post(
 		CONTEXT_PATH + "/blog/delete",
-		{"id":id},
+		{"id":id,"userId":userId},
 		function (data) {
 			data = $.parseJSON(data);
 			var userid = $("#deleteBtn").val()
 			if(data.code == 0){
 				location.href = CONTEXT_PATH + "/user/profile/" + userid;
 			}else {
-				alert(data.msg);
+				location.href = CONTEXT_PATH + "/error";
 			}
 		}
 	)
+}
+
+//编辑
+function update(id,userid) {
+	location.href = CONTEXT_PATH + "/blog/editblogpage/" + id + "/" + userid;
+}
+
+function enterinfo(userid) {
+	location.href = CONTEXT_PATH + "/user/userinfo/" + userid;
+}
+
+function enteredit() {
+	location.href = CONTEXT_PATH + "/user/editinfo";
 }

@@ -1,29 +1,25 @@
 <!doctype html>
-<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-	<!--访问该页面时，在此处生成CSRF令牌,-->
-<!--	<meta name="_csrf" th:content="${_csrf.token}">-->
-<!--	<meta name="_csrf_header" th:content="${_csrf.headerName}">-->
-
 <!--	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">-->
 	<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
 	<link rel="stylesheet" th:href="@{/css/global.css}" />
-	<link rel="stylesheet" th:href="@{/css/index.css}" />
+	<link rel="stylesheet" th:href="@{/css/letter.css}" />
 	<link rel="stylesheet" th:href="@{/css/index2.css}" />
-	<title>星悦博客</title>
+	<title>私信列表</title>
 </head>
-<body>	
+<body>
 	<div class="nk-container">
+		<!-- 头部 -->
 		<div class="header" style="height: 5%" th:fragment="header">
 			<div class="header_resize" style="height: 5%">
 				<div class="menu_nav" style="height: 5%">
 					<ul>
-						<li class="active"><a th:href="@{/index}">首页</a></li>
+						<li><a th:href="@{/index}">首页</a></li>
 						<li><a th:href="@{/classify}">专区</a></li>
-						<li th:if="${loginUser!=null}"><a th:href="@{/conversation/list}">私信</a></li>
+						<li class="active" th:if="${loginUser!=null}"><a th:href="@{/conversation/list}">私信</a></li>
 						<li><a th:href="@{/searchpage}">搜索</a></li>
 						<li th:if="${loginUser==null}"><a th:href="@{/register}">注册</a></li>
 						<li th:if="${loginUser==null}"><a th:href="@{/login}">登录</a></li>
@@ -36,42 +32,26 @@
 				<br><br th:if="${loginUser==null}">
 			</div>
 		</div>
-		<a th:href="@{/blog/newblog}" th:if="${loginUser!=null}">
-			<img th:src="@{/img/add.jpg}" style="height: 100px;width: 100px;position: fixed;margin-left: 1380px;margin-top: 1%;border-radius: 50%">
-		</a>
+
 		<!-- 内容 -->
-		<div class="main" style="margin-top: 1px;background-image: url(/img/bg.png);background-size: 100% 100%;background-attachment: fixed">
-			<div class="container" style="width: 90%;border-radius: 20px;background-color: #dfd3f6">
-				<div class="position-relative">
-					<!-- 筛选条件 -->
-					<ul class="nav nav-tabs">
-						<a class="btn4" style="text-align: center;margin-left: 36%;font-size: 20px" th:href="@{/index(orderMode=0)}">新发布</a>&nbsp;
-						<a class="btn4" style="text-align: center;font-size: 20px" th:href="@{/index(orderMode=1)}">受欢迎</a>
-					</ul>
-				</div>
-
-
-				<!-- 帖子列表 -->
+		<div class="main" style="background-image: url(/img/bg10.png);background-size: 100% 100%;background-attachment: fixed">
+			<div class="container" style="border-radius: 20px;height: 620px;background-color: #dfd3f6">
+				<!-- 私信列表 -->
 				<ul class="list-unstyled">
-					<li class="media pb-2 pt-2 mb-1 " style="width: 520px;height: 200px;margin-left: 20px;margin-top: 20px;float:left;background-color: #ebdef6;border-radius: 10px" th:each="map:${blogs}">
-						<a th:href="@{|/user/profile/${map.user.id}|}">
-							<img th:src="${map.user.headerUrl}" class="mr-4" alt="用户头像" style="width:95px;height:95px">
+					<li class="media pb-2 pt-2 mb-3 position-relative" style="width: 430px;height: 150px;background-color: #ebdef6;float: left;margin-left: 20px;border-radius:10px" th:each="map:${conversations}">
+						<a th:href="@{|/user/profile/${map.target.id}|}">
+							<img th:src="${map.target.headerUrl}" class="mr-4 user-header" style="height: 100px;width: 100px" alt="用户头像" >
 						</a>
 						<div class="media-body">
-							<h6 class="mt-1 mb-1" style="font-size: 20px">
-								<a th:href="@{|/blog/detail/${map.blog.id}|}" th:utext="${map.blog.title}" style="font-size: 18px;color: #985fb6;">博客标题</a>
-								<span class="badge badge-secondary" style="background-color: #985fb6;float: right;margin-right: 20px" th:utext="${map.blog.tag}">标签</span>
+							<h6 class="mt-0 mb-3">
+								<span th:utext="${map.target.username}" style="font-size: 20px;color: #985fb6">用户名</span>
+								<span th:if="${map.unreadCount!=0}" style="color: #ec4848">(有新消息!)</span>
+								<span class="float-right text-muted font-size-12" th:text="${#dates.format(map.conversation.createTime,'yyyy-MM-dd HH:mm:ss')}">时间</span>
 							</h6>
-							<div class="mb-1" th:utext="${map.blog.content}" style="margin-top: 1px;font-size: 15px">
-								 博客内容
-							</div>
-							<div class="text-muted font-size-12" style="font-size: 15px">
-								<u class="mr-1" th:utext="${map.user.username}" style="color: #088bbd">用户名</u><b th:text="${#dates.format(map.blog.createTime,'yyyy-MM-dd HH时')}">2019-04-15 15:32:18</b>
-								<a type="button" style="text-align: center;" th:href="@{|/blog/detail/${map.blog.id}|}" class="btn2" />阅读更多</a>
-								<ul class="d-inline float-right mr-4 mt-2">
-									<li class="d-inline ml-2"><img src="/img/like.jpg" style="width: 15px;height: 15px;margin-right: 4px"><span th:text="${map.likeCount}">点赞数</span></li>
-									<li class="d-inline ml-2">|</li>
-									<li class="d-inline ml-2"><img src="/img/comment.jpg" style="width: 15px;height: 15px;margin-right: 4px"><span th:text="${map.blog.commentCount}">评论数</span></li>
+							<div>
+								<a th:href="@{|/conversation/detail/${map.conversation.conversationId}|}" th:utext="${map.conversation.content}"></a>
+								<ul class="d-inline font-size-12 float-right">
+									<li class="d-inline ml-2"><a th:href="@{|/conversation/detail/${map.conversation.conversationId}|}" style="color: #e80021">共<i th:text="${map.conversationCount}">条数</i>条会话</a></li>
 								</ul>
 							</div>
 							<hr style="height:1px;border-top:1px double #985fb6;" />
@@ -79,7 +59,7 @@
 					</li>
 				</ul>
 				<!-- 分页 -->
-				<nav class="mt-5" th:if="${page.rows>0}" th:fragment="pagination" style="clear: both">
+				<nav class="mt-5" th:if="${page.rows>0}" style="clear: both">
 					<ul class="pagination justify-content-center">
 						<li class="page-item">
 							<a class="page-link" style="color: #985fb6" th:href="@{${page.path}(current=1)}">首页</a>
@@ -98,8 +78,6 @@
 					</ul>
 				</nav>
 			</div>
-
-
 		</div>
 	</div>
 
@@ -108,5 +86,6 @@
 	<script th:src="@{/js/bootstrap.js}" crossorigin="anonymous"></script>
 <!--	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>-->
 	<script th:src="@{/js/global.js}"></script>
+	<script th:src="@{/js/letter.js}"></script>
 </body>
 </html>

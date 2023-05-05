@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nowcoder.community.dao.CommentMapper">
+<mapper namespace="com.xxy.blog.dao.CommentMapper">
     <sql id="selectFields">
         id,user_id,entity_type,entity_id,target_id,content,status,create_time
     </sql>
@@ -17,7 +17,7 @@
         where status = 0
         and entity_type = #{entityType}
         and entity_id = #{entityId}
-        order by create_time asc
+        order by create_time desc
         limit #{offset},#{limit}
     </select>
 

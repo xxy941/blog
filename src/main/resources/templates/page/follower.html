@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!--	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">-->
+	<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+	<link rel="stylesheet" th:href="@{/css/global.css}" />
+	<link rel="stylesheet" th:href="@{/css/index2.css}" />
+	<link rel="stylesheet" th:href="@{/css/follow.css}" />
+	<link rel="stylesheet" th:href="@{/css/profile.css}" />
+	<link rel="stylesheet" th:href="@{/css/perpage_paul.css}" />
+	<title>关注</title>
+</head>
+<body>
+	<div class="nk-container">
+		<!-- 头部 -->
+		<div class="header" style="height: 5%" th:fragment="header">
+			<div class="header_resize" style="height: 5%">
+				<div class="menu_nav" style="height: 5%">
+					<ul>
+						<li><a th:href="@{/index}">首页</a></li>
+						<li><a th:href="@{/classify}">专区</a></li>
+						<li th:if="${loginUser!=null}"><a th:href="@{/conversation/list}">私信</a></li>
+						<li><a th:href="@{/searchpage}">搜索</a></li>
+						<li th:if="${loginUser==null}"><a th:href="@{/register}">注册</a></li>
+						<li th:if="${loginUser==null}"><a th:href="@{/login}">登录</a></li>
+						<li th:if="${loginUser!=null}" sec:authorize="hasAnyAuthority('admin')"> <a th:href="@{/manager}" >管理</a></li>
+					</ul>
+				</div>
+				<div class="searchform" th:if="${loginUser!=null}">
+					<div class="headPortrait" title ="个人中心"> <a th:if="${loginUser!=null}" th:href="@{|/user/profile/${loginUser.id}|}"  > <img th:src="${loginUser.headerUrl}" /></a></div>
+				</div>
+				<br><br th:if="${loginUser==null}">
+			</div>
+		</div>
+
+		<!-- 内容 -->
+		<div class="main" style="margin-top: 1px;background-image: url(/img/bg16.png);background-size: 100% 100%;background-attachment: fixed">
+			<div class="container" style="height: 700px;border-radius: 20px;background-color: #dfd3f6">
+				<div class="position-relative">
+					<!-- 选项 -->
+					<ul class="nav nav-tabs mb-3">
+						<a class="btn4" style="text-align: center;margin-left: 34%;font-size: 20px" th:utext="|${user.username}关注|" th:href="@{|/followees/${user.id}|}">关注的</a>&nbsp;
+						<a class="btn4" style="text-align: center;font-size: 20px" th:utext="|关注${user.username}|" th:href="@{|/followers/${user.id}|}">被关注的</a>
+					</ul>
+				</div>
+
+
+				<div class="pMain pMain_1" data-classid="85" >
+					<div class="txList " th:each="users:${users}">
+						<a th:href="@{|/user/profile/${users.user.id}|}" class="img"  >
+							<img class="lazy" th:src="${users.user.headerUrl}" width="184px" height="184px" />
+						</a>
+						<div align="center">
+						<a th:href="@{|/user/profile/${users.user.id}|}" style="font-size: 20px;" th:utext="${users.user.username}" class="imgTitle" ></a>
+						</div>
+					</div>
+				</div>
+
+				<nav class="mt-5" th:if="${page.rows>0}" style="clear: both;margin-top: 20px">
+					<ul class="pagination justify-content-center">
+						<li class="page-item">
+							<a class="page-link" style="color: #985fb6" th:href="@{${page.path}(current=1)}">首页</a>
+						</li>
+						<li th:class="|page-item ${page.current==1?'disabled':''}|">
+							<a class="page-link" th:href="@{${page.path}(current=${page.current-1})}" style="color: #985fb6">上一页</a></li>
+						<li th:class="|page-item |" th:each="i:${#numbers.sequence(page.from,page.to)}">
+							<a class="page-link" th:href="@{${page.path}(current=${i})}" th:style="${i==page.current?'background-color: #985fb6;color: white':'color: #985fb6'}"  th:text="${i}">1</a>
+						</li>
+						<li th:class="|page-item ${page.current==page.total?'disabled':''}|">
+							<a class="page-link" style="color: #985fb6" th:href="@{${page.path}(current=${page.current+1})}">下一页</a>
+						</li>
+						<li class="page-item">
+							<a class="page-link" style="color: #985fb6" th:href="@{${page.path}(current=${page.total})}">末页</a>
+						</li>
+					</ul>
+				</nav>
+
+			</div>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
+<!--	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>-->
+	<script th:src="@{/js/global.js}"></script>
+	<script th:src="@{/js/profile.js}"></script>
+	<script th:src="@{/js/bootstrap.js}" crossorigin="anonymous"></script>
+</body>
+</html>

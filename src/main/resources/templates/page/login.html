@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!--	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">-->
+	<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+	<link rel="stylesheet" th:href="@{/css/global.css}" />
+	<link rel="stylesheet" th:href="@{/css/login.css}" />
+	<link rel="stylesheet" th:href="@{/css/index2.css}" />
+	<title>登录</title>
+</head>
+<body>
+	<div class="nk-container">
+		<!-- 头部 -->
+		<div class="header" style="height: 5%" th:fragment="header">
+			<div class="header_resize" style="height: 5%">
+				<div class="menu_nav" style="height: 5%">
+					<ul>
+						<li><a th:href="@{/index}">首页</a></li>
+						<li><a th:href="@{/classify}">专区</a></li>
+						<li th:if="${loginUser!=null}"><a th:href="@{/conversation/list}">私信</a></li>
+						<li><a th:href="@{/searchpage}">搜索</a></li>
+						<li th:if="${loginUser==null}"><a th:href="@{/register}">注册</a></li>
+						<li class="active" th:if="${loginUser==null}"><a th:href="@{/login}">登录</a></li>
+						<li th:if="${loginUser!=null}" sec:authorize="hasAnyAuthority('admin')"> <a th:href="@{/manager}" >管理</a></li>
+					</ul>
+				</div>
+				<div class="searchform" th:if="${loginUser!=null}">
+					<div class="headPortrait" title ="个人中心"> <a th:if="${loginUser!=null}" th:href="@{|/user/profile/${loginUser.id}|}"  > <img th:src="${loginUser.headerUrl}" /></a></div>
+				</div>
+				<br><br th:if="${loginUser==null}">
+			</div>
+		</div>
+
+		<!-- 内容 -->
+		<div class="main" style="background-image: url(/img/bg12.png);background-size: 100% 100%;background-attachment: fixed">
+			<div class="container pl-5 pr-5 pt-5 pb-5 mt-5 mb-5" >
+					<form th:action="@{/login}" method="post" class="sign-in-form">
+						<h2 class="title" >登&nbsp;录</h2>
+						<hr style="height: 5px">
+						<div class="input-field">
+							<i class="fas fa-user"></i>
+							<input type="text" id="username" name="username" th:value="${param.username}" placeholder="用户名" />
+						</div>
+						<p th:text="${usernameMsg}" style="color: #e80021">用户名错误!</p>
+						<div class="input-field">
+							<i class="fas fa-lock"></i>
+							<input type="password" id="password" name="password" th:value="${param.password}" placeholder="密码" />
+						</div>
+						<p th:text="${passwordMsg}" style="color: #e80021">密码错误!</p>
+						<div class="row">
+							<div class="col">
+						<div class="input-field2">
+							<i class="fas fa-user"></i>
+							<input type="text" id="verifycode" name="code" placeholder="验证码" />
+						</div>
+							</div>
+							<div class="col mt-2">
+								<a href="javascript:refresh_kaptcha();" class="font-size-12 align-bottom" >
+									<img th:src="@{/kaptcha}" id="kaptcha" style="width:120px;height:50px;" class="mr-2"/>
+								</a>
+							</div>
+						</div>
+						<p th:text="${codeMsg}" style="color: #e80021">验证码错误!</p>
+						<hr style="height:1px;border-top:1px #985fb6;" />
+						<input type="submit" value="登录" class="btn solid" />
+					</form>
+
+			</div>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
+<!--	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>-->
+	<script th:src="@{/js/global.js}"></script>
+	<script th:src="@{/js/bootstrap.js}" crossorigin="anonymous"></script>
+	<script>
+		function refresh_kaptcha() {
+			var path = CONTEXT_PATH + "/kaptcha?p=" + Math.random();
+			$("#kaptcha").attr("src", path);
+		}
+	</script>
+</body>
+</html>
