@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>新建博客</title>
+    <link href="img/favicon.ico" rel="shortcut icon">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">-->
+    <!--input格式 -->
+    <link rel="stylesheet" th:href="@{/css/PRise.css}" media="all" />
+    <!--页面 -->
+    <link rel="stylesheet" th:href="@{/css/pRevise.css}" media="all" />
+    <!--各个布局 -->
+    <link rel="stylesheet" th:href="@{/css/prrr.css}" media="all" />
+    <link rel="stylesheet" th:href="@{/css/index2.css}" />
+</head>
+<body>
+
+<div class="pagecolor">
+    <div class="header" style="height: 5%;background-color: #DACFE5FF" >
+        <div class="header_resize" style="height: 5%">
+            <div class="menu_nav" style="height: 5%">
+                <ul>
+                    <li><a th:href="@{/index}">首页</a></li>
+                    <li><a th:href="@{/classify}">专区</a></li>
+                    <li th:if="${loginUser!=null}"><a th:href="@{/conversation/list}">私信</a></li>
+                    <li><a th:href="@{/searchpage}">搜索</a></li>
+                    <li th:if="${loginUser==null}"><a th:href="@{/register}">注册</a></li>
+                    <li th:if="${loginUser==null}"><a th:href="@{/login}">登录</a></li>
+                    <li th:if="${loginUser!=null}" sec:authorize="hasAnyAuthority('admin')"> <a th:href="@{/manager}" >管理</a></li>
+                </ul>
+            </div>
+            <div class="searchform" th:if="${loginUser!=null}">
+                <div class="headPortrait" title ="个人中心"> <a th:if="${loginUser!=null}" th:href="@{|/user/profile/${loginUser.id}|}"  > <img th:src="${loginUser.headerUrl}" /></a></div>
+            </div>
+            <br><br th:if="${loginUser==null}">
+        </div>
+    </div>
+    <div id="main" style="background-size: 100% 100%;background-image: url(/img/bg19.png);background-attachment: fixed">
+
+        <div class="page-settings">
+            <div class="setting pb10">
+                <div class="nav-tabs pa">
+                    <h class="baseinfo fl active">新建博客</h>
+                    <div class="cb"></div>
+                </div>
+                <div class="contentBox">
+                    <div class="formBox">
+                        <div id="setting-profile" class="setting-wrap setting-profile">
+
+                            <div class="wlfg-wrap clearfix ">
+                                <label class="label-name" ></label>
+                                <div class="rlf-group">
+                                    <div align="center">
+                                        <img  th:src="${loginUser.headerUrl}" width="100" height="100">
+                                    </div>
+                                    <div class="cb"></div>
+                                    <p class="rlf-tip-wrap errorHint color-red" ></p>
+                                </div>
+                            </div>
+
+                            <form id="profile" method="post" th:action="@{/blog/add}">
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="newusername" >用户名：</label>
+                                    <div class="rlf-group">
+                                        <input type="text" name="newusername" readonly="readonly" id="newusername"   autocomplete="off"  data-validate="require-nick"  class="moco-form-control" th:value="${loginUser.username}" placeholder="请输入昵称."/>
+                                    </div>
+                                </div>
+
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="title" >标题：</label>
+                                    <div class="rlf-group">
+                                        <input type="text" name="title" id="title" th:value="${param.title}"  autocomplete="off"  data-validate="require-nick"  class="moco-form-control" />
+                                        <p th:text="${titleMsg}" style="color: #e80021">标题不正确!</p>
+                                    </div>
+                                </div>
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="tag">标签：</label>
+                                    <div class="rlf-group">
+                                        <select class="moco-form-control rlf-select" name="tag" hidefocus="true" id="tag" data-validate="require-select">
+                                            <option value="科技">科技</option>
+                                            <option value="生活">生活</option>
+                                            <option value="美食">美食</option>
+                                            <option value="娱乐">娱乐</option>
+                                            <option value="军事">军事</option>
+                                            <option value="政治">政治</option>
+                                            <option value="运动">运动</option>
+                                            <option value="宠物">宠物</option>
+                                            <option selected="selected" value="其他">其他</option>
+                                        </select>
+                                        <p class="rlf-tip-wrap errorHint color-red"></p>
+                                    </div>
+                                </div>
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="content">内容：</label>
+                                    <div class="rlf-group">
+                                        <div class="pr">
+                                            <textarea name="content"  id="content" th:value="${param.content}" th:text="${param.content}" rows="10" class="noresize js-sign moco-form-control"></textarea>
+                                            <p th:text="${contentMsg}" style="color: #e80021">内容不正确!</p>
+                                            <input  class="submit"  id="publishBtn"   type="submit" value="发布" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
+<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>-->
+<script th:src="@{/js/global.js}"></script>
+</body>
+</html>

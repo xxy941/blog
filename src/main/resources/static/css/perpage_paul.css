@@ -1,0 +1,378 @@
+@charset "UTF-8";
+
+
+a{ color: #c40b00; }
+
+.wrap{ max-width: 1000px; }
+
+.newbolgfont{
+	font-size:22px;
+}
+
+.personalp{
+	font-size:140%!important; 
+	color: #005CBF;
+	font-family: SimHei;
+}
+
+
+.btn15-16{
+	margin-left: 70%;
+    float: left;
+}
+
+
+
+.name{
+	
+	color: #FFFFFF;
+}
+
+.bg{
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+}
+
+
+
+
+/* 头像 */
+.sidebar .avatar{
+    width: 150px;
+    height: 150px;
+    margin-left:10%;
+	margin-top: 50px;
+	margin-bottom: 10px;
+    background: #fff;
+    border-radius: 100%;
+    border: #fff 0px solid;
+   
+}
+
+.sidebar .avatar img{
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+}
+
+/* 1 - 页眉
+-------------------------------- */
+
+/* - 侧边栏 */
+.sidebar{
+    top: 0;
+    left: 0;
+    bottom: 0;
+    color: #000000;
+    width: 13%;
+    position: fixed;
+    overflow: hidden;
+    overflow-y: auto;
+    background: #303030;
+}
+
+
+
+/* -- 侧边栏导航 */
+.sidebar .nav{
+    margin: 0;
+    display: flex;
+    list-style: none;
+    flex-direction: column;
+}
+.sidebar .nav a{
+    color: #f3f3f3;
+    padding: 1em;
+    display: block;
+    text-align: center;
+    transition: background .3s, box-shadow .3s;
+}
+.sidebar .nav a:hover{
+    background: rgba(0, 0, 0, .2);
+}
+
+main{
+    margin-left: 250px;
+}
+
+@media screen and (max-width: 900px) {
+    .sidebar {
+        width: inherit;
+        position: relative;
+    }
+    .sidebar .nav{
+        background: #4f4f4f;
+        flex-direction: row;
+        justify-content: center;
+    }
+    .sidebar .nav a:hover{
+        background: none;
+        box-shadow: 0 -3px 0 #fff inset;
+    }
+    main{
+        margin-left: 0;
+    }
+}
+
+@media print{
+    .sidebar{
+        display: none;
+    }
+    main{
+        margin-left: 0;
+    }
+}
+
+
+/* 2 - 正文
+-------------------------------- */
+main section{
+    padding: 5em 0;
+    position: relative;
+}
+@media screen and (max-width: 900px) {
+    main section{
+        padding: 3em 0;
+    }
+}
+
+
+
+.title{
+    margin-bottom: 1em;
+}
+.title:before{
+    float: left;
+    margin-right: .5em;
+    font-family: "FontAwesome";
+}
+
+#info .title:before{
+    content: "\f005";
+}
+
+#works .title:before{
+    content: "\f091";
+}
+#story .title:before{
+    content: "\f0b1";
+}
+#team .title:before{
+    content: "\f024";
+}
+
+
+/* - 作品 */
+.works-item img{
+    transition: transform 0.3s;
+}
+.works-item img:hover{
+    transform: scale(1.05, 1.05);
+}
+.works-item p{
+    padding: 1em 0;
+    text-align: center;
+}
+
+
+
+/*========================================================================*/
+
+/* 0 - 全局
+-------------------------------- */
+html,
+dl, dt, dd, ol, ul,
+h1, h2, h3, h4, h5, h6,
+pre, code, form, p,
+fieldset, legend, figure{
+    margin: 0;
+    padding: 0;
+}
+
+
+
+@media screen and (max-width: 500px){
+    html[resize] body{
+        font-size: 14px;
+    }
+}
+
+@media screen and (min-width: 1930px){
+    html[resize] body{
+        font-size: 18px;
+    }
+}
+
+*, *:before, *:after{
+    box-sizing: border-box;
+}
+
+/* - 部分老式浏览器的更正 */
+article, aside,
+header, footer,
+nav, section, main{
+    display: block;
+}
+
+
+
+
+/* 1 - 容器
+-------------------------------- */
+.wrap{
+    margin-left:auto;
+    margin-right: auto;
+    max-width: 1200px;
+    padding: 0 1.25em;
+    box-sizing: content-box;
+}
+
+.wrap.min{
+    max-width: 800px;
+}
+.wrap.mid{
+    max-width: 1000px;
+}
+.wrap.max{
+    max-width: 1600px;
+}
+
+.wrap.full{
+    max-width: 100%;
+}
+.wrap.thin{
+    padding: 0 .75em;
+}
+.wrap.thick{
+    padding: 0 1.5em;
+}
+.wrap.clear{
+    padding-left: 0;
+    padding-right: 0;
+}
+
+
+
+
+/* - 栅格系统 */
+.row{
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -1.25em;
+    margin-right: -1.25em;
+}
+
+.row.thin{
+    margin-left: -1em;
+    margin-right: -1em;
+}
+
+.row.full{
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.row.scrollable{
+    overflow: auto;
+    margin-left: 0;
+    margin-right: 0;
+    flex-wrap: nowrap;
+}
+ 
+
+
+
+
+/* --- 手机 */
+@media screen and (min-width: 600px){
+    .row .col-s-6{
+        -ms-flex: 0 0 50%;
+        flex: 0 0 50%;
+        max-width: 50%;
+    } 
+} 
+
+
+
+/* --- 电脑 */
+@media screen and (min-width: 1024px){ 
+    .row .col-l-4{
+        -ms-flex: 0 0 33.3333%;
+        flex: 0 0 33.3333%;
+        max-width: 33.3333%;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+h1{
+    font-size: 2em;
+}
+
+h1, h2, h3, h4, h5, h6{
+    margin-bottom: 1rem;
+}
+
+h1:last-child, h2:last-child, h3:last-child, h4:last-child, h5:last-child, h6:last-child, p:last-child{
+    margin-bottom: 0;
+}
+
+p{
+    line-height: 1.8em;
+    margin-bottom: 1em;
+}
+
+a{
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover{
+    color: #ffc670;
+}
+
+abbr[title]{
+    cursor: help;
+    text-decoration: none;
+    border-bottom: 1px dotted;
+}
+
+em, mark, kbd{
+    padding: 0 .5em;
+    border-radius: .5em;
+    display: inline-block;
+}
+
+em{
+    color: #fff;
+    font-style: normal;
+    background: #3498db;
+}
+
+kbd{
+    color: #fff;
+    font-size: 90%;
+    background: #333;
+    font-family: 'Consolas', 'Courier New', monospace, "微软雅黑";
+}
+
+audio{
+    vertical-align: middle;
+}
+
+img, svg, video{
+    height: auto;
+    max-width: 100%;
+    vertical-align: middle;
+}

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>详细个人信息</title>
+    <link href="img/favicon.ico" rel="shortcut icon">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+
+    <!--input格式 -->
+    <link rel="stylesheet" th:href="@{/css/PRise.css}" media="all" />
+    <!--页面 -->
+    <link rel="stylesheet" th:href="@{/css/pRevise.css}" media="all" />
+    <!--各个布局 -->
+    <link rel="stylesheet" th:href="@{/css/prrr.css}" media="all" />
+    <link rel="stylesheet" th:href="@{/css/index2.css}" />
+</head>
+<body>
+
+<div class="pagecolor">
+    <div class="header" style="height: 5%;background-color: #DACFE5FF" >
+        <div class="header_resize" style="height: 5%">
+            <div class="menu_nav" style="height: 5%">
+                <ul>
+                    <li><a th:href="@{/index}">首页</a></li>
+                    <li><a th:href="@{/classify}">专区</a></li>
+                    <li th:if="${loginUser!=null}"><a th:href="@{/conversation/list}">私信</a></li>
+                    <li><a th:href="@{/searchpage}">搜索</a></li>
+                    <li th:if="${loginUser==null}"><a th:href="@{/register}">注册</a></li>
+                    <li th:if="${loginUser==null}"><a th:href="@{/login}">登录</a></li>
+                    <li th:if="${loginUser!=null}" sec:authorize="hasAnyAuthority('admin')"> <a th:href="@{/manager}" >管理</a></li>
+                </ul>
+            </div>
+            <div class="searchform" th:if="${loginUser!=null}">
+                <div class="headPortrait" title ="个人中心"> <a th:if="${loginUser!=null}" th:href="@{|/user/profile/${loginUser.id}|}"  > <img th:src="${loginUser.headerUrl}" /></a></div>
+            </div>
+            <br><br th:if="${loginUser==null}">
+        </div>
+    </div>
+    <div id="main" style="background-size: 100% 100%;background-image: url(/img/bg17.png);background-attachment: fixed">
+
+        <div class="page-settings">
+            <div class="setting pb10">
+                <div class="nav-tabs pa">
+                    <h class="baseinfo fl active">基本信息</h>
+                    <div class="cb"></div>
+                </div>
+                <div class="contentBox">
+                    <div class="formBox">
+                        <div id="setting-profile" class="setting-wrap setting-profile">
+
+                            <div class="wlfg-wrap clearfix ">
+                                <label class="label-name" ></label>
+                                <div class="rlf-group">
+                                    <div align="center">
+                                        <img  th:src="${userinfo.headerUrl}" width="100" height="100">
+                                    </div>
+                                    <div class="cb"></div>
+                                    <p class="rlf-tip-wrap errorHint color-red" ></p>
+                                </div>
+                            </div>
+
+                            <form id="profile" method="post" action="updateUserInfo?username=<%=user.getUsername()%>">
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="newusername" >用户名：</label>
+                                    <div class="rlf-group">
+                                        <input type="text" name="newusername" readonly="readonly" id="newusername"  autocomplete="off"  data-validate="require-nick"  class="moco-form-control" th:value="${userinfo.username}" placeholder="请输入昵称."/>
+                                        <p class="rlf-tip-wrap errorHint color-red" ></p>
+                                    </div>
+                                </div>
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="sex">性别：</label>
+                                    <div class="rlf-group">
+                                        <select class="moco-form-control rlf-select" name="sex" hidefocus="true" id="sex" data-validate="require-select">
+                                            <option th:if="${userinfo.sex=='请完善信息'}" th:selected="${userinfo.sex=='请完善信息'?'selected':''}" value="请完善信息">尚未完善</option>
+                                            <option th:if="${userinfo.sex==null}"  value="男">尚未完善</option>
+                                            <option th:if="${userinfo.sex=='男'}" th:selected="${userinfo.sex=='男'?'selected':''}" value="男">男</option>
+                                            <option th:if="${userinfo.sex=='女'}" th:selected="${userinfo.sex=='女'?'selected':''}" value="女">女</option>
+                                            <option th:if="${userinfo.sex=='保密'}" th:selected="${userinfo.sex=='保密'?'selected':''}" value="保密">保密</option>
+                                        </select>
+
+                                        <p class="rlf-tip-wrap errorHint color-red"></p>
+                                    </div>
+                                </div>
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="age"  >年龄：</label>
+                                    <div class="rlf-group">
+                                        <input type="text" name="age" readonly="readonly" id="age"  autocomplete="off"  data-validate="require-nick"  class="moco-form-control" th:value="${userinfo.age==0?userinfo.age:'请完善信息'}" placeholder="请输入年龄."/>
+                                        <p class="rlf-tip-wrap errorHint color-red" ></p>
+                                    </div>
+                                </div>
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="education">学历：</label>
+                                    <div class="rlf-group">
+                                        <select class="moco-form-control rlf-select" name="education" hidefocus="true" id="education" data-validate="require-select">
+                                            <option th:if="${userinfo.education=='请完善信息'}" th:selected="${userinfo.education=='请完善信息'?'selected':''}" value="请完善信息">尚未完善</option>
+                                            <option th:if="${userinfo.education==null}">尚未完善</option>
+                                            <option th:if="${userinfo.education=='专科'}" th:selected="${userinfo.education=='专科'?'selected':''}" value="专科">专科</option>
+                                            <option th:if="${userinfo.education=='本科'}" th:selected="${userinfo.education=='本科'?'selected':''}" value="本科">本科</option>
+                                            <option th:if="${userinfo.education=='硕士'}" th:selected="${userinfo.education=='硕士'?'selected':''}" value="硕士">硕士</option>
+                                            <option th:if="${userinfo.education=='博士'}" th:selected="${userinfo.education=='博士'?'selected':''}" value="博士">博士</option>
+                                            <option th:if="${userinfo.education=='其他'}" th:selected="${userinfo.education=='其他'?'selected':''}" value="其他">其他</option>
+                                        </select>
+                                        <p class="rlf-tip-wrap errorHint color-red"></p>
+                                    </div>
+                                </div>
+
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="email" >邮箱：</label>
+                                    <div class="rlf-group">
+                                        <input type="text" name="email" id="email"  autocomplete="off" readonly="readonly"  data-validate="require-nick"  class="moco-form-control" th:value="${userinfo.email}" placeholder="请输入邮箱."/>
+                                        <p class="rlf-tip-wrap errorHint color-red" ></p>
+                                    </div>
+                                </div>
+                                <div class="wlfg-wrap clearfix">
+                                    <label class="label-name" for="introduction">自我介绍：</label>
+                                    <div class="rlf-group">
+                                        <div class="pr">
+                                            <textarea name="introduction" readonly="readonly"  id="introduction"  rows="3" class="noresize js-sign moco-form-control" th:placeholder="${userinfo.introduction==null?'尚未完善':''}" th:utext="${userinfo.introduction}"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

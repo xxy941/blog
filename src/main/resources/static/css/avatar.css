@@ -1,0 +1,31 @@
+.main .container {
+    width: 650px;
+    border-radius: 10%;
+}
+
+.title {
+    font-size: 2.2rem;
+    color: #985fb6;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.btn {
+    width: 150px;
+    background-color: #985fb6;
+    border: none;
+    outline: none;
+    height: 49px;
+    border-radius: 49px;
+    color: #fff;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.btn:hover {
+    background-color: #5e0b86;
+    color: #eeeeee;
+}
